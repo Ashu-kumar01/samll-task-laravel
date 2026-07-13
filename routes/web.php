@@ -21,4 +21,4 @@ Route::post('/age-calculater', [AgeCalculaterController::class, 'store'])->name(
 
 Route::get('/new-invoice', [InvoiceController::class, 'index'])->name('invoice');
 Route::post('/new-invoice', [InvoiceController::class, 'store'])->name('invoice.store');
-Route::get('/pdf', [PdfController::class, 'generate'])->name('gen.pdf');
+Route::get('/pdf/{id}/invoice/', [PdfController::class, 'generate'])->name('gen.pdf'); 

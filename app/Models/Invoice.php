@@ -20,6 +20,13 @@ class Invoice extends Model
         'subtotal',
         'gst',
         'discount',
-        'gTotal'
+        'gTotal',
+    ];
+
+    protected $casts = [
+        'items' => 'array',
+        'price' => 'array',
+        'qty' => 'array',
+        'total' => 'array',
     ];
 }

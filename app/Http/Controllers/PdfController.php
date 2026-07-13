@@ -2,39 +2,46 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Invoice;
 use Barryvdh\DomPDF\Facade\PDF;
 use Illuminate\Http\Request;
 
 class PdfController extends Controller
 {
-    public function generate()
+    public function generate($id)
     {
-        $invoice = [
-            'invoice_no' => 'INV-2026001',
-            'date' => now()->format('d-m-Y'),
-            'customer' => [
-                'name' => 'Ashwani Kumar',
-                'email' => 'ashwani@gmail.com',
-                'phone' => '9876543210',
-                'address' => 'Raipur'
+        $invoices = Invoice::findOrFail($id);
+
+        $invoiceData = [
+            'invoice_no' => $invoices->invoice_no,
+            'date'       => $invoices->date,
+
+            'restaurant' => [
+                'name'  => $invoices->restaurant_name,
+                'phone' => $invoices->mobile_nu,
             ],
-            'products' => [
-                [
-                    'name' => 'Laptop',
-                    'qty' => 1,
-                    'price' => 50000,
-                    'gst' => 18
-                ],
-                [
-                    'name' => 'Mouse',
-                    'qty' => 2,
-                    'price' => 1000,
-                    'gst' => 18
-                ]
-            ]
+
+            'customer' => [
+                'name'    => $invoices->name,
+                'phone'   => $invoices->mobile_nu,
+                'email'   => '',
+                'address' => '',
+            ],
+
+            'products' => [],
         ];
 
-        return Pdf::loadView('pdf.user', compact('invoice'))
+        foreach ($invoices->items as $index => $item) {
+            $invoiceData['products'][] = [
+                'name'  => $item,
+                'qty'   => $invoices->qty[$index],
+                'price' => $invoices->price[$index],
+                'gst'   => $invoices->gst,
+            ];
+        }
+
+        return Pdf::loadView('pdf.user', compact('invoices'))
+            ->stream('ledger')
             ->stream('invoice.pdf');
     }
 }

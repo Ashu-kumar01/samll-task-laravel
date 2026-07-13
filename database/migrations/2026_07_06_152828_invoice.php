@@ -13,20 +13,27 @@ return new class extends Migration
     {
         Schema::create('invoices', function (Blueprint $table) {
             $table->id();
+
             $table->string('restaurant_name');
             $table->string('invoice_no')->unique();
-            $table->string('date');
+            $table->date('date');
+
             $table->string('name')->nullable();
-            $table->integer('mobile_nu')->nullable();
-            $table->string('items');
-            $table->decimal('price', 10, 2);
-            $table->integer('qty');
-            $table->decimal('total', 10, 2);
-            $table->string('note')->nullable();
+            $table->string('mobile_nu', 15)->nullable();
+
+            $table->json('items');
+            $table->json('price');
+            $table->json('qty');
+            $table->json('total');
+
+            $table->text('note')->nullable();
+
             $table->decimal('subtotal', 10, 2);
             $table->decimal('gst', 10, 2)->default(0);
             $table->decimal('discount', 10, 2)->default(0);
-            $table->decimal('gtotal', 10, 2);
+            $table->decimal('gTotal', 10, 2);
+
+            $table->timestamps();
         });
     }
 

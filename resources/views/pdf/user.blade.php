@@ -2,56 +2,95 @@
 <html>
 
 <head>
+    <meta charset="UTF-8">
+    <title>Restaurant Invoice</title>
 
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: DejaVu Sans;
-            font-size: 13px;
+            font-size: 12px;
+            color: #333;
+            padding: 25px;
+        }
+
+        .invoice-box {
+            border: 1px solid #ccc;
+            padding: 20px;
         }
 
         .header {
             text-align: center;
+            border-bottom: 2px solid #000;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
         }
 
-        .company {
-            font-size: 24px;
+        .header h1 {
+            font-size: 28px;
+        }
+
+        .header p {
+            margin-top: 5px;
+        }
+
+        .section-title {
+            background: #222;
+            color: #fff;
+            padding: 6px 10px;
+            margin-top: 20px;
+            margin-bottom: 10px;
             font-weight: bold;
-        }
-
-        .invoice-info {
-            margin-top: 20px;
-        }
-
-        .customer {
-            margin-top: 20px;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
         }
 
+        table td,
         table th {
-            background: #343a40;
-            color: white;
-        }
-
-        table th,
-        table td {
-            border: 1px solid #ccc;
+            border: 1px solid #bbb;
             padding: 8px;
         }
 
-        .total-table {
+        table th {
+            background: #f2f2f2;
+        }
+
+        .details td:first-child {
+            width: 180px;
+            font-weight: bold;
+            background: #fafafa;
+        }
+
+        .summary {
             width: 40%;
-            float: right;
+            margin-left: auto;
             margin-top: 20px;
         }
 
-        .footer {
-            margin-top: 80px;
+        .summary td:first-child {
+            font-weight: bold;
+        }
+
+        .notes {
+            margin-top: 25px;
+        }
+
+        .signature {
+            margin-top: 70px;
             text-align: right;
+        }
+
+        .signature hr {
+            width: 180px;
+            margin-left: auto;
         }
     </style>
 
@@ -59,144 +98,142 @@
 
 <body>
 
-    <div class="header">
+    <div class="invoice-box">
 
-        <div class="company">
-            ABC TECHNOLOGIES
+        <div class="header">
+            <h1>{{ $invoices->restaurant_name }}</h1>
+            <p>Phone : {{ $invoices->mobile_nu }}</p>
         </div>
 
-        GST : 22AAAAA0000A1Z5
+        <!-- Restaurant Details -->
+        <div class="section-title">Restaurant Details</div>
 
-    </div>
-
-    <div class="invoice-info">
-
-        Invoice :
-        {{ $invoice['invoice_no'] }}
-
-        <br>
-
-        Date :
-        {{ $invoice['date'] }}
-
-    </div>
-
-    <div class="customer">
-
-        <h3>Customer Details</h3>
-
-        <b>Name :</b>
-        {{ $invoice['customer']['name'] }}
-
-        <br>
-
-        <b>Email :</b>
-        {{ $invoice['customer']['email'] }}
-
-        <br>
-
-        <b>Phone :</b>
-        {{ $invoice['customer']['phone'] }}
-
-    </div>
-
-    <table>
-
-        <thead>
-
+        <table class="details">
             <tr>
-
-                <th>#</th>
-
-                <th>Product</th>
-
-                <th>Qty</th>
-
-                <th>Price</th>
-
-                <th>GST</th>
-
-                <th>Total</th>
-
+                <td>Name</td>
+                <td>{{ $invoices->restaurant_name }}</td>
             </tr>
 
-        </thead>
+            <tr>
+                <td>Phone</td>
+                <td>{{ $invoices->mobile_nu }}</td>
+            </tr>
+        </table>
 
-        <tbody>
+        <!-- Invoice Details -->
 
-            @php
-                $subtotal = 0;
-            @endphp
+        <div class="section-title">Invoice Details</div>
 
-            @foreach ($invoice['products'] as $key => $item)
-                @php
+        <table class="details">
+            <tr>
+                <td>Invoice No.</td>
+                <td>{{ $invoices->invoice_no }}</td>
+            </tr>
 
-                    $total = $item['qty'] * $item['price'];
+            <tr>
+                <td>Date</td>
+                <td>{{ $invoices->date }}</td>
+            </tr>
 
-                    $subtotal += $total;
+            <tr>
+                <td>Customer Name</td>
+                <td>{{ $invoices->name }}</td>
+            </tr>
+        </table>
 
-                @endphp
+        <!-- Order Items -->
+
+        <div class="section-title">Order Items</div>
+
+        <table>
+
+            <thead>
 
                 <tr>
-
-                    <td>{{ $key + 1 }}</td>
-
-                    <td>{{ $item['name'] }}</td>
-
-                    <td>{{ $item['qty'] }}</td>
-
-                    <td>{{ $item['price'] }}</td>
-
-                    <td>{{ $item['gst'] }}%</td>
-
-                    <td>{{ $total }}</td>
-
+                    <th>#</th>
+                    <th>Item</th>
+                    <th>Price</th>
+                    <th>Qty</th>
+                    <th>Total</th>
                 </tr>
-            @endforeach
 
-        </tbody>
+            </thead>
 
-    </table>
+            <tbody>
 
-    <table class="total-table">
+                @php
+                    $subtotal = 0;
+                @endphp
 
-        <tr>
+                @foreach ($invoices->items as $index => $item)
+                    @php
+                        $price = $invoices->price[$index];
+                        $qty = $invoices->qty[$index];
+                        $total = $price * $qty;
+                        $subtotal += $total;
+                    @endphp
 
-            <td>Subtotal</td>
+                    <tr>
+                        <td>{{ $index + 1 }}</td>
+                        <td>{{ $item }}</td>
+                        <td>₹ {{ number_format($price, 2) }}</td>
+                        <td>{{ $qty }}</td>
+                        <td>₹ {{ number_format($total, 2) }}</td>
+                    </tr>
+                @endforeach
 
-            <td>{{ $subtotal }}</td>
+            </tbody>
 
-        </tr>
+        </table>
 
-        <tr>
+        @php
+            $gst = $invoices->gst ?? 5;
+            $discount = $invoices->discount ?? 0;
 
-            <td>GST</td>
+            $gstAmount = ($subtotal * $gst) / 100;
 
-            <td>{{ ($subtotal * 18) / 100 }}</td>
+            $grandTotal = $subtotal + $gstAmount - $discount;
+        @endphp
 
-        </tr>
+        <table class="summary">
 
-        <tr>
+            <tr>
+                <td>Subtotal</td>
+                <td>₹ {{ number_format($subtotal, 2) }}</td>
+            </tr>
 
-            <td><b>Grand Total</b></td>
+            <tr>
+                <td>GST ({{ $gst }}%)</td>
+                <td>₹ {{ number_format($gstAmount, 2) }}</td>
+            </tr>
 
-            <td>
+            <tr>
+                <td>Discount</td>
+                <td>₹ {{ number_format($discount, 2) }}</td>
+            </tr>
 
-                <b>
+            <tr>
+                <td><strong>Grand Total</strong></td>
+                <td><strong>₹ {{ number_format($grandTotal, 2) }}</strong></td>
+            </tr>
 
-                    {{ $subtotal + ($subtotal * 18) / 100 }}
+        </table>
 
-                </b>
+        <div class="notes">
 
-            </td>
+            <div class="section-title">Notes</div>
 
-        </tr>
+            <p>{{ $invoices->notes ?? 'Thank you for visiting...' }}</p>
 
-    </table>
+        </div>
 
-    <div class="footer">
+        <div class="signature">
 
-        Authorized Signature
+            <hr>
+
+            Authorized Signature
+
+        </div>
 
     </div>
 

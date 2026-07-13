@@ -46,6 +46,30 @@
     <div class="container">
 
         <div class="invoice-box">
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul class="mb-0">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+            @if (session('success'))
+                <div class="alert alert-success">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <span>{{ session('success') }}</span>
+                        @if (session('invoice_id'))
+                            <form action="{{ route('gen.pdf', session('invoice_id')) }}" method="get">
+                                <button type="submit" class="btn btn-success">Print Invoice</button>
+                            </form>
+                        @endif
+                    </div>
+                </div>
+            @endif
+
+
+
             <form action="{{ route('invoice.store') }}" method="post">
                 @csrf
 
@@ -56,7 +80,7 @@
                     </div>
 
                     <button type="submit" onclick="" class="btn btn-primary no-print">
-                        Print Invoice
+                        Save Invoice
                     </button>
                 </div>
 
@@ -78,7 +102,7 @@
 
                         <div class="mb-3">
                             <label>Phone</label>
-                            <input type="text" name="mobile_nu" class="form-control">
+                            <input type="text" name="mobile_nu" class="form-control" value="{{old('mobile_nu')}}">
                         </div>
 
 
@@ -92,25 +116,23 @@
 
                             <div class="col-md-6 mb-3">
                                 <label>Invoice No.</label>
-                                <input type="text" class="form-control" name="invoice_no" value="INV-1001">
+
+                                <input type="text" class="form-control" name="invoice_no"
+                                    value="{{ $invoiceNo }}">
                             </div>
 
                             <div class="col-md-6 mb-3">
                                 <label>Date</label>
-                                <input type="date" class="form-control" name="date" value=""
+                                <input type="text" class="form-control" name="date" value="{{old('date')}}"
                                     id="currentDate" readonly>
                             </div>
 
                             <div class="col-md-6 mb-3">
                                 <label>Customer Name</label>
-                                <input type="text" class="form-control" name="name">
+                                <input type="text" class="form-control" name="name" value="{{old('name')}}">
                             </div>
-
-
                         </div>
-
                     </div>
-
 
                 </div>
 
@@ -139,19 +161,19 @@
                             <tr>
 
                                 <td>
-                                    <input type="text" class="form-control item" name="items[]">
+                                    <input type="text" class="form-control item" name="items[]" value="{{old('items[]')}}">
                                 </td>
 
                                 <td>
-                                    <input type="number" class="form-control price" value="0" name='price[]'>
+                                    <input type="number" class="form-control price" value="0" name='price[]' {{old('price[]')}}>
                                 </td>
 
                                 <td>
-                                    <input type="number" class="form-control qty" value="1" name="qty[]">
+                                    <input type="number" class="form-control qty" value="1" name="qty[]" {{old('qty[]')}}>
                                 </td>
 
                                 <td>
-                                    <input type="number" class="form-control total" readonly name="total[]">
+                                    <input type="number" class="form-control total" readonly name="total[]" {{old('qty[]')}}>
                                 </td>
 
                                 <td class="text-center no-print">
@@ -180,7 +202,7 @@
 
                         <label>Notes</label>
 
-                        <textarea class="form-control" rows="8" placeholder="Thank you for visiting..." name="note"></textarea>
+                        <textarea class="form-control" rows="8" placeholder="Thank you for visiting..." name="note">{{old('note')}}</textarea>
 
                     </div>
 
@@ -233,6 +255,23 @@
     </div>
 
     <script>
+        function currentDate() {
+
+            const date = new Date();
+            const current_Date = document.getElementById('currentDate')
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+
+            const formattedDate = `${year}-${month}-${day}`;
+            current_Date.value = formattedDate
+            // console.log(formattedDate);
+
+            // return formattedDate;
+        }
+
+        currentDate();
+
         function calculateInvoice() {
 
             let subtotal = 0;
@@ -269,24 +308,23 @@
 
         document.getElementById("addRow").onclick = function() {
 
-            let row = `
-<tr>
+            let row = `<tr> 
+                             <td>
+                                    <input type="text" class="form-control item" name="items[]" value="{{old('items[]')}}">
+                                </td>
 
-                            <td>
-                                <input type="text" class="form-control item" name="items[]">
-                            </td>
+                                <td>
+                                    <input type="number" class="form-control price" value="0" name='price[]' {{old('price[]')}}>
+                                </td>
 
-                            <td>
-                                <input type="number" class="form-control price" value="0" name='price[]'>
-                            </td>
+                                <td>
+                                    <input type="number" class="form-control qty" value="1" name="qty[]" {{old('qty[]')}}>
+                                </td>
 
-                            <td>
-                                <input type="number" class="form-control qty" value="1" name="qty[]">
-                            </td>
+                                <td>
+                                    <input type="number" class="form-control total" readonly name="total[]" {{old('qty[]')}}>
+                                </td>
 
-                            <td>
-                                <input type="number" class="form-control total" readonly name="total[]">
-                            </td>
 
                             <td class="text-center no-print">
                                 <button class="btn btn-danger removeRow">
